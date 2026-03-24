@@ -5,6 +5,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 A lightweight Python utility designed to automatically fetch the **NASA Astronomy Picture of the Day (APOD)** and set it as your Windows desktop wallpaper.
+Software is using DEMO_KEY standardly (you can use private one after registration at NASA's API), which has these limitations: Hourly Limit: 30 requests per IP address per hour. Daily Limit: 50 requests per IP address per day.
 
 ## 🌟 Features
 * **Daily Updates:** Automatically grabs the latest space imagery from NASA's official API.
