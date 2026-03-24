@@ -1,6 +1,6 @@
 # NASA APoD Wallpaper Automator
 
-![Python](https://img.shields.io/badge/python-3.7+-blue.svg)
+![Python](https://img.shields.io/badge/python-3.1+-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-windows-lightgrey.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
@@ -23,10 +23,12 @@ pip install requests
 ### 2. Compilation to .exe
 To use this as a standalone application without needing Python installed on the target machine, compile it using **PyInstaller**:
 
-pip install pyinstaller
-pyinstaller --noconsole --onefile nasa_apod.pyw
+* pip install pyinstaller
+* pyinstaller --noconsole --onefile app.pyw
+* or
+* python -m PyInstaller --noconsole --onefile app.pyw
 
-*The compiled executable will be located in the `/dist` folder.*
+*The compiled executable will be located in the `/dist` folder. Based on Python version, you will get x86 (32-bit) or x64 (64-bit) executable. 32-bit can run on 32-bit and on 64-bit OS aswell, 64-bit can run on 64-bit OS only!*
 
 ### 3. Setting up Auto-Start
 To ensure your wallpaper updates every time you turn on your PC:
