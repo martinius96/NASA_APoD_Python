@@ -89,23 +89,27 @@ def fetch_apod_url():
                 else:
                     logger.warning("No HD URL detected, fallback to standard URL")
                     logger.info("Standard URL: {}".format(data.get("url")))
+                text_content = str(data.get("explanation"))+"\nCOPYRIGHT: "+str(data.get('copyright').replace("\n",""))
                 # Return HD URL if available, otherwise fallback to standard URL
-                return data.get("hdurl", data.get("url"))
+                return data.get("hdurl", data.get("url")), text_content
             
-            return None
+            return None, None
         except requests.exceptions.ReadTimeout as e:
             logger.error("Request timed out")
             retry=True
+        except requests.exceptions.HTTPError as e:
+            logger.error("HTTP error: {}".format(e))
+            retry=True
         except Exception as e:
-            logger.error(e)
-            return None
+            logger.error("{}: {}".format(type(e),e))
+            return None, None
 
 def download_and_set_wallpaper():
     # Ensure Pictures directory exists
     if not os.path.exists(PICTURES_DIR):
         os.makedirs(PICTURES_DIR)
 
-    image_url = fetch_apod_url()
+    image_url, description = fetch_apod_url()
     if not image_url:
         return
     
@@ -143,6 +147,14 @@ def download_and_set_wallpaper():
     # 20: SPI_SETDESKWALLPAPER, 3: Update registry and notify system
     logger.info("Setting desktop wallpaper via SPI_SETDESKWALLPAPER")
     ctypes.windll.user32.SystemParametersInfoW(20, 0, IMAGE_PATH, 3)
+
+    # Write description to a text file on the desktop
+    logger.info("Writing description to desktop - NASA_APoD.txt")
+    description_path = os.path.join(os.path.expanduser("~"), "Desktop", "NASA_APoD.txt")
+    with open(description_path, 'w', encoding='UTF-8') as output:
+        output.write(description)
+    
+    return
 
 
 
