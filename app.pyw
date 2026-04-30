@@ -9,6 +9,7 @@ import sys
 import logging
 import tempfile
 import time
+from datetime import datetime, timedelta
 
 # API_KEY = "DEMO_KEY"          # Replaced with "get_api_from_file" function below
 NASA_APOD_URL = "https://api.nasa.gov/planetary/apod"
@@ -65,16 +66,27 @@ def fetch_apod_url():
     max_retries = 10
     attempt = 0
     retry = True
+    search_date = None
+    back_one_day = False
+
+    # # Testing
+    # search_date = search_date - timedelta(days=1)
+
     while retry and attempt < max_retries:
         attempt += 1
         retry = False
-        if attempt > 1:
+        if attempt > 1 and back_one_day == False:
             delay = retry_initial_delay * (2**(attempt-2))
             logger.info("Retrying. Attempt #{}, waiting {} second(s)".format(int(attempt),int(delay)))
             time.sleep(delay)
 
+        back_one_day = False
+
         try:
-            params = {"api_key": api_key}
+            if not search_date is None:
+                params = {"api_key": api_key, "date": search_date.strftime('%Y-%m-%d')}
+            else:
+                params = {"api_key": api_key}
             logger.info("Polling API for image URL")
             response = requests.get(NASA_APOD_URL, params=params, timeout=10)
             response.raise_for_status()
@@ -92,8 +104,20 @@ def fetch_apod_url():
                 text_content = str(data.get("explanation"))+"\nCOPYRIGHT: "+str(data.get('copyright').replace("\n",""))
                 # Return HD URL if available, otherwise fallback to standard URL
                 return data.get("hdurl", data.get("url")), text_content
-            
-            return None, None
+            else:
+                # Work backwards until an image is found for a maximum of 10 days
+                # Decrease the attempt number so that this isn't counted as a "fail"
+                search_date = datetime.strptime(data.get("date"),"%Y-%m-%d")
+                logger.info("APoD for {} is not an image".format(search_date.strftime("%d-%m-%Y")))
+                if (datetime.now() - search_date).days < 10:
+                    search_date = search_date - timedelta(days=1)
+                    retry = True
+                    back_one_day = True
+                    attempt-=1
+                else:
+                    logger.info("No image media found in last 10 days. Exiting.")
+                    return None,None
+
         except requests.exceptions.ReadTimeout as e:
             logger.error("Request timed out")
             retry=True
