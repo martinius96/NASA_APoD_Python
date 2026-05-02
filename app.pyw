@@ -101,7 +101,7 @@ def fetch_apod_url():
                 else:
                     logger.warning("No HD URL detected, fallback to standard URL")
                     logger.info("Standard URL: {}".format(data.get("url")))
-                text_content = str(data.get("explanation"))+"\nCOPYRIGHT: "+str(data.get('copyright').replace("\n",""))
+                text_content = str(data.get("title","--Untitled--"))+"\n\n"+str(data.get("explanation",""))+"\n\nCOPYRIGHT: "+str(data.get('copyright',"None provided")).replace("\n","")
                 # Return HD URL if available, otherwise fallback to standard URL
                 return data.get("hdurl", data.get("url")), text_content
             else:
